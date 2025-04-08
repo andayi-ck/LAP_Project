@@ -1,0 +1,191 @@
+import sqlite3
+conn = sqlite3.connect("market.db")
+cursor = conn.cursor()
+cursor.execute("SELECT sqlite_version();")
+print(cursor.fetchone())
+conn.close()
+
+CREATE TABLE Animals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    species_id INTEGER,
+    habitat_id INTEGER,
+    weight_id INTEGER,
+    feed_id INTEGER,
+    produce_id INTEGER,
+    additives_id INTEGER,
+    FOREIGN KEY (species_id) REFERENCES Species(id),
+    FOREIGN KEY (habitat_id) REFERENCES Habitat(id),
+    FOREIGN KEY (weight_id) REFERENCES WeightTracking(id),
+    FOREIGN KEY (feed_id) REFERENCES Feeds(id),
+    FOREIGN KEY (produce_id) REFERENCES Produce(id),
+    FOREIGN KEY (additives_id) REFERENCES AdditivesAndMinerals(id)
+);
+
+
+CREATE TABLE Species (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    description TEXT
+);
+
+
+CREATE TABLE Feeds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    animal_id INTEGER,
+    feed_type TEXT NOT NULL,
+    quantity_per_day TEXT,
+    FOREIGN KEY (animal_id) REFERENCES Animals(id)
+);
+
+CREATE TABLE VaccinationSchedule (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    animal_id INTEGER,
+    vaccine_name TEXT NOT NULL,
+    age_bracket TEXT NOT NULL,
+    date_given DATE,
+    next_due DATE,
+    FOREIGN KEY (animal_id) REFERENCES Animals(id)
+);
+
+CREATE TABLE Habitat (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    animal_id INTEGER,
+    preferred_conditions TEXT NOT NULL,
+    temperature_range TEXT,
+    FOREIGN KEY (animal_id) REFERENCES Animals(id)
+);
+
+
+CREATE TABLE WeightTracking (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    animal_id INTEGER,
+    age_bracket TEXT NOT NULL,
+    average_weight TEXT NOT NULL,
+    FOREIGN KEY (animal_id) REFERENCES Animals(id)
+);
+
+CREATE TABLE AdditivesAndMinerals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    animal_id INTEGER,
+    supplement_name TEXT NOT NULL,
+    dosage TEXT NOT NULL,
+    FOREIGN KEY (animal_id) REFERENCES Animals(id)
+);
+
+CREATE TABLE Produce (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    animal_id INTEGER,
+    product_type TEXT NOT NULL,
+    average_yield_per_cycle TEXT,
+    FOREIGN KEY (animal_id) REFERENCES Animals(id)
+);
+
+
+
+def get_animal_info(animal_name):
+    conn = sqlite3.connect("animals.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM animals WHERE LOWER(name) = LOWER(?)", (animal_name,))
+    animal = cursor.fetchone()
+    conn.close()
+    return animal
+
+# Home Page with Search Box
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        search_query = request.form["animal_name"]
+        animal_info = get_animal_info(search_query)
+        return render_template("index.html", animal=animal_info)
+    return render_template("index.html", animal=None)
+
+
+    <h2>Search for an Animal</h2>
+    <form method="POST">
+        <input type="text" name="animal_name" placeholder="Enter animal name" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if animal %}
+        <h3>Animal Details</h3>
+        <p><strong>Name:</strong> {{ animal[1] }}</p>
+        <p><strong>Feed:</strong> {{ animal[2] }}</p>
+        <p><strong>Vaccination Schedule:</strong> {{ animal[3] }}</p>
+        <p><strong>Habitat:</strong> {{ animal[4] }}</p>
+        <p><strong>Weight:</strong> {{ animal[5] }} kg</p>
+        <p><strong>Minerals:</strong> {{ animal[6] }}</p>
+        <p><strong>Output/Produce:</strong> {{ animal[7] }}</p>
+    {% endif %}
+
+
+def get_animal_info(animal_name):
+    conn = sqlite3.connect("animals.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM animals WHERE LOWER(name) LIKE LOWER(?)", ('%' + animal_name + '%',))
+    animal = cursor.fetchone()
+    conn.close()
+    return animal
+
+
+
+@app.route('/search', methods=['GET'])
+def search_results():
+    query = request.args.get('animal', '').strip()
+
+    if not query:
+        return render_template('market.html', error="Please enter an animal name.")
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            Animals.name AS animal_name,
+            Species.name AS species_name,
+            Habitat.preferred_conditions AS habitat,
+            Habitat.temperature_range,
+            IFNULL(Feed.age_range, 'N/A') AS feed_age,
+            IFNULL(Feed.feed_type, 'N/A') AS feed_type,
+            IFNULL(Feed.quantity_per_day, 'N/A') AS quantity_per_day,
+            IFNULL(VaccinationSchedule.age_range, 'N/A') AS vaccine_age,
+            IFNULL(VaccinationSchedule.vaccine_name, 'N/A') AS vaccine_name,
+            IFNULL(Diseases.age_range, 'N/A') AS disease_age,
+            IFNULL(Diseases.disease_name, 'N/A') AS disease_name,
+            IFNULL(Produce.product_type, 'N/A') AS produce,
+            IFNULL(WeightTracking.age_range, 'N/A') AS weight_age,
+            IFNULL(WeightTracking.average_weight, 'N/A') AS average_weight
+        FROM Animals
+        LEFT JOIN Species ON Animals.id = Species.animal_id
+        LEFT JOIN Habitat ON Animals.id = Habitat.animal_id
+        LEFT JOIN Feed ON Animals.id = Feed.animal_id
+        LEFT JOIN VaccinationSchedule ON Animals.id = VaccinationSchedule.animal_id
+        LEFT JOIN Diseases ON Animals.id = Diseases.animal_id
+        LEFT JOIN Produce ON Animals.id = Produce.animal_id
+        LEFT JOIN WeightTracking ON Animals.id = WeightTracking.animal_id
+        WHERE LOWER(Animals.name) = LOWER(?);
+    """, (query,))
+
+    results = cur.fetchall()
+    conn.close()
+
+    if not results:
+        return render_template('market.html', error=f"No data found for {query}.", animal=query)
+
+    return render_template('market.html', results=results, animal=query)
+
+
+@app.route('/verify', method=["POST"])
+def verify():
+    email=request.form['email']
+    msg=Message(subject='OTP', sender='andayi.ck@gmail.com', recipients=[email])
+    msg.body=str(otp)
+    mail.send(msg)
+    return render_template(verify.html)
+
+@app.route('/validate', methods=['POST'])
+def validate():
+    user_otp= request.form['otp']
+    if otp==int(user_otp):
+        return "<body bgcolor='blue'><h1>Emial Verificatiion Successful</h1></body>"
+    return "<h2>Please Try Again</h2>"

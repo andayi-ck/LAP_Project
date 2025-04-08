@@ -1,0 +1,213 @@
+FLASK COURSE - PYTHON web application Development.  contains flask,python and bootstrap.
+--RUNNING FLASK APPLICATION ON TERMINAL, -flask run
+
+began by installing Flask in the cmd.
+        --to rerun the server, type : flask run ; on terminal of this directory
+Officially began at : 1. market.py -- this contains various links to pages.
+    2.went to styling templates for the html page.
+        This is done by creating a new directory folder called Templates
+
+    3.added home.html which can be accessed by the 'market.py' through the render_template()
+        function as seen.
+        --went on to styling by using BootStrap.
+    
+    4.went to work on market.html
+        --SENDING DATA TO TEMPLATES --THIS IS ILLUSTrated in the
+            '@app.route('/market')
+            def market_page():
+                return render_template('market.html', items='items')
+
+
+            {# JINJA SYNTAX USed as " {{ }} "#}
+            <!--concept of Jinja templates is applied here as seen by
+                    the double curly braces'{{ }}' which enables to display information from
+                    our routes in the 'market.py' page. -->
+    
+    5.TEMPLATE INHERITANCE . - enables programmers to create one base templates
+            where by we can reuse a piece of code amongst different files instead of copying and pasting
+            that same code in these different files
+        --base.html
+            So we are going to inherit an entire html code from the base template in base.html in the home.html
+            This can be seen in this home.html
+            --same was done in market.html ; to show inheritance using the base template ,,base.html
+
+    6.MODELS AND DATABASES - went ahead and installed SQLITE3--a flask tool-- AT TERMinal which enables us to create tables within the database that we are going
+            to work using python code.Installed flask-sqlalchemy
+            --mostly involved market.py where some changes were made at,,,line 2,line 4,line 5
+            we shall then start by creating our own classes which shall then be converted into
+            database tables.These are called modules.
+        --WE ARE GOING TO CREATE ONE MODULE CALLED -items- . the database is created from Line 6 to 15
+        --Afterwards , went to terminal and imported our 'market.py' file. go to 1:37:00 to see more about how this is done
+        where there is a 'market.db' file created in folder 'instance'
+        --afterwards , we enter values for the database as can be seen from 1:39:00 onwards to 1:47:44.
+        FROM HERE YOU CAN ALSO SEE HOW TO ADD AN ITEM IN THE DATABASE
+
+        --FROM ABOVE WE HAVE ENABLED CONNECTING THE , WEBSITE WITH THE DATABASE .as is seen now with the display
+        of the items on the 'market' page.
+
+        --we then went to website DB browser for SQLite and downloaded SQLIte to be able to see
+        how really, our information looks like in the database.
+        --we were able to select the 'market.db' and open it in the DB BROWSER for SQLITE3. It enables us to see the project more visually.
+
+
+    7.PROJECT RESTRUCTURE - HERE , WE ARE GOING TO GROUP THE MODULES AND routes together for easier appearance.
+        --created modules.py where we are going to keep modules.
+        --created route.py which would contain all the routes.
+        we moved a few content from the 'market.py' file and added it to modules.py and routes.py
+        --we also created 'run.py' in the 'FlaskMarket' folder which is going to act like a package and will be responsible for executing
+            our application.
+        --we then moved removed code from 'market.py' to 'run.py' leaving 'market.py' and thus deleting it.
+        --created another file __init__.py where we moved code from 'run.py' into here.We went on to add some other code in run.py which is going to call
+            the various modules
+
+    8.MODEL RELATIONSHIPS - WE ARE GOING to design how our database is going to accept user
+        through passwords,registration,email,username etc.this is clearly illustarted in the 'models.py' from line 4 to line 10-THIS IS THE USER mODEL
+        we added User1,Item1, item2 in the database
+
+    9.FLASK FORMS - HERE , we are going to customize a html form for our users which willbe able to see if the info. provided is valid, ie
+            incorrect password, username etc.This is already provided for in Flask through some packages which
+            we are going to install, ie flask-wtf and wtforms
+        --created 'market\forms.py' for this section.
+        --we also did some routing when user clicks on register option at 'routes.py' from line
+            47 to 50.
+        --created 'templates\register.html' which will contain the form and will be called in the 'routes.py'
+            -at this stage, we are also going to create a secret key that is going to be used to identify our
+            flask application.This generally allows our clients to submit actual info. through Forms to the database,this action should be
+            secure enough. see from 2:37:25 onwards how it was done on python shell -- 2:39:00.
+            --this secret key is later added in '__init.py__' at line 7.This enables TO DISPLAY THE FORM that was created.
+
+    10.FLASK VALIDATIONS - WE are going to setup up the behind-the-scene actions thatwould be
+            done when we submit the form/click the 'Create Account' button.
+            To do this we, have to go to the 'routes.py' where the register form is
+            contained and write the python code. --from line 50 to 56
+            --WE THEN added the 'GET' and 'POST' methods on line 47.This will enable the 'Form submitting'.
+                and 'create Account' actions
+            --The route will thus handle 'GET' and 'POST' methods.
+            --ALso to be ableto protect our from attacks as the user is submitting the Form to the Server
+                by hackers, we will add the Line 23 in 'register.html'
+            --WHEN THIS IS DONE , IT is possible to create the account and as is seen on the page.
+                    -to see the creation of this account , we can go to python shell and type in
+                    user.query.all() and be able to see all the users who have 'Created Accounts'
+                    in this website.
+
+            --we also created code to see that the confirm PassWOrd1 and Password2 are the same.
+            This can be achieved through the FLASK VALIDATION AS DONE ON 'forms.py' on line 5 and added
+                    ...validators=[]etc on the remaining lines from line 8 to 13.
+            
+            --Then went to 'routes.py' to see how we can handle to check the errors that can
+            emerge due to these validations seen from line 57 to 59 and also the entirety from
+            line 50 to 59 in general.
+            --This would generally display the error message if there errors arriving from the validations
+            in the server side.
+    
+    11.FLASH MESSAGES and ADVANCED VALIDATIONS -- flash basically allow to display the error message on the html form.
+        -this would be achieved by changing the 'print()' in 'routes.py' on line 59
+        to 'flash()' and import 'flash' from 'flask' as seen on line 4 in 'routes.py'
+
+        --then went to 'base.html' to be able to set up code for the display of the flashed_messages.
+        --these improvements can be seen from lines 63 to 74 in 'base.html'
+    --we also updated the 'forms.py' to ensure that their is only one access to one unique username and email-address in the database.
+        This is updated from line 9 to 17.
+
+
+NB:IN OUR FLASK APPLICATIon, the TOGGLE BUTTON does not work when clicked in the Homepage or market page
+
+    12.USER AUTHENTICATION - went to intsall flask_bcrypt to enable the db to hashout user password for security.went to '__init__.py'
+        to initialzie flask_bcrypt ,and then went on to create an instance of bcrypt from line 12
+        --then went to 'models.py' to add some from line 14 to 21
+        --WENT THEN TO DESIGN THE user' Login page successfully
+        --Created a Login Form at our by beginning routing at 'routes.py' from line 68 to 71
+        --added another file 'login.html' and also made some changes in 'base.html' line 53 so that it directs the user to
+            the Login page when clicked from the dashboard.
+    
+        --added some code in 'forms.py' which will handle the form from line 27 to 29
+        --went to ;routes.py' to create an instance of the Login form
+        --went to 'login.html' to customize this Login html form.We also borrowed some functionality from the Login page to the 
+            registration page where the user is able to click 'Login' if he/she already has an account and vice versa in the
+            the 'Login page' where one is able to click 'create account' if he/she does not have one.
+
+    13.USER AUTHENTICATION PART 2 - installed flask_login to help in handling our Login system in Flask easily.
+        began by importing this Library in our flask app AT line 6 in '__init__.py'.Created an instance at line 14 and pass (app) as an arguement.
+        -went to 'routes.py' to set up the Login form validation from line 72 to 81.
+        --went to 'models.py' to write functions that will be accessible to each user object from line 23 to 24
+        added some code in 'model.py' from line 6 - 8 and imported 'login_manager' from market as well. and also line 4
+        -and line 10 added ..UserMixin
+    
+    --now that the user has Logged In , we want to display ANOTHER INformation on this page on the navbar instead
+        of the home,Market,register,Login and thus went to 'base.html'.These are basically the actions that will be displayed when, the
+        user has already Logged In.
+    --went to 'base.html' from line  to implement this. as seen from line 52 to 79.It also
+        contains the user budget, added some styling so that when the budget is greater than 4 digits, a comma separates them, in 'models.py' from
+        line 18 to 23.
+
+N/B: IN OUR FLASK APP, THE 'LOGIN' OPTION IS NOT WORKING.
+
+
+    14.LOG-OUT AND CUSTOMIZATIONS - WE ARE Going to add an additional route in our 'routes.py' line 84 to 89 to direct our users back to the homepage
+        --began by doing some changes at line  in 68 'base.html'.
+
+        --went to design the home page and its appearance.
+        -we want to import a function logout_required in 'routes.py' that will help in not taking our user direct to the market page if they
+            have not logged in/registered. by adding line 32 in 'routes.py' and line 16 in '__init__.py'
+            --added some code '__init__.py' to display info about logging in to the user in line 17
+            'routes.py' line 60 and 61 which acknowldges when the user is Logged in
+
+    15.ITEM PURCHASING (part 1) - ADDED SOME DIVISION in the market page in that left pane = all items ate here; and
+            right pane = contains purchased items, which can be achieved by the bootstrap grading system as seen n bootstrap documentation.
+            --this was done in 'market.html' to show the division of the page
+        
+        --Modals in bootstrap is also styling which displays sort of a pop up box when implement in code.Thus we created folder 'includes' and file 'items_modals.html'
+            in it.The modals can be seen when one clicks on 'More Info' at the home page.
+        --the modals are also to be designed to be unique as per the items available on the market as per line copy-paste line 30 in 'market.html'
+
+
+    16.ITEM PURCHASING (PART 2) - we are going to customize the modal to have more options,ie to 'buy' options into that
+        modal so that when one clicks he/she can buy that item.
+        --we went on to add a form in 'forms.py' and call it here at 'items_modals.html' from line 55 to 67
+            ..and also added import PurchaseItemForm in line 5 in 'routes.py'
+        --also added line 39 to 56 in 'routes.py'.WE also added the 'GET' , 'POST' TO handle the form in line 30 of 'routes.py'
+        --the balance in the top at the navbar will also reduce depending on the item selected from the market.
+        --any item selected/purchased from the market will also be removed automatically from the market.
+        --lines 57 to 59 in 'routes.py' help us in solving the form resubmission which when we previously clicked on refresh the Page,a pop up
+            box would appear asking to 'Confirm Form Resubmission ...etc'
+
+        --also implemented some logic where if a user ,doesnt have enough money in his/her account,they are not able to
+        purchase an item FROM THE MARKET.tHIS IMplmentation began as from line 44--- in 'routes.py' and also in 'models.py' from line 37 and 38.
+        --went to 'models.py' and added line 52 to 55 which displays a pop up below the navbar -when an item is purchased.
+
+    17.ITEM SELLING - we are going to create some bootstrap cards/nice looking square shapes to show Items that the user has/owns
+            which will include some buttons that say,,'sell this item'.
+            --went to 'routes.py' line 54 and '..owned_items=owned_items' in line 55.
+            --then went to market.html to design this implementation from line 53 to 72
+            --added another file 'owned_items_modals.html' which is going to handle the selling modal,,to trigger a modal-small pop up box when we
+                purchase an item, we will have to trigger an identifier 'id' present in the <div tags> of the modal.
+                --before using a modal , you have to trigger it,,as can be seen ie, in lines in 56 in 'market.html' and other instances.
+                --we are also going to configure the functionality of this modal 'to Confirm selling of an item' as well to in 'routes.py' in the Sell Item Logic from line 51 to 59
+            --we also added another function() "can_sell" in 'models.py' to handle selling an item in line 57 to 58
+
+
+
+        
+    REMOVED THIS CODE FROM 'home.html' and it should be replaced with the one in the {% block content%} and {% endblock %}
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-dark" style="color:white">
+        <div class="col-md-5 p-lg-5 mx-auto my-5">
+            <h1 class="display-4 font-weight-normal">ZAKARIA AIR-BUS COMPANY LIMITED</h1>
+            <p class="lead font-weight-normal">Book your Journey now with us.</p>
+            <a class="btn btn-primary" href="{{ url_for('market_page') }}">Book now</a>
+        </div>
+        <div class="product-device box-shadow d-none d-md-block"></div>
+        <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
+    </div>
+
+--also MADE MANY CHANGES TO 'home.html' from line 17 to 811.IT CONTAINS THE CODE FOR THE HOMEPAGE OF THE livestock analytics platform.
+    also added the route for livestock_dashboard.html in routes.py from line 122 to 134
+
+    --went to 'run.py' and added line 5 to 27
+    added anothe folder 'flask-mongo' for the backend and added file 'app.py' in it.
+    --see the code below it
+
+
+
+
+
+    
