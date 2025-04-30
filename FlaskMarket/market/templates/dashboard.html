@@ -1,0 +1,74 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Livestock Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/material.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+    <script src="{{ url_for('static', filename='js/syncfusion/ej2.min.js') }}"></script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center">Livestock Analytics Dashboard</h1>
+        <a href="/" class="btn btn-primary mb-3">Back to Search</a>
+        <h3>Total Feed Intake Across Animals</h3>
+        <div id="feedIntakeChart" style="width: 100%; height: 400px;"></div>
+        <h3>Total Produce Across Animals</h3>
+        <div id="produceChart" style="width: 100%; height: 400px;"></div>
+    </div>
+
+    <script>
+        // Register Syncfusion License (replace with your actual license key)
+        ej.base.registerLicense('YOUR_LICENSE_KEY');
+
+        // Chart data from Flask
+        const totalFeedIntakeData = {{ total_feed_intake_data | tojson | safe }};
+        const totalProduceData = {{ total_produce_data | tojson | safe }};
+
+        // Render charts on page load
+        document.addEventListener("DOMContentLoaded", function () {
+            // Feed Intake Chart
+            const feedIntakeChart = new ej.charts.Chart({
+                primaryXAxis: { title: "Animal", valueType: "Category" },
+                primaryYAxis: { title: "Total Feed Intake (kg)", labelFormat: "{value} kg" },
+                series: [
+                    {
+                        type: "Column",
+                        dataSource: totalFeedIntakeData,
+                        xName: "animal",
+                        yName: "total_feed",
+                        name: "Total Feed Intake",
+                        fill: "#9b59b6"
+                    }
+                ],
+                tooltip: { enable: true },
+                legendSettings: { visible: true }
+            });
+            feedIntakeChart.appendTo("#feedIntakeChart");
+
+            // Produce Chart
+            const produceChart = new ej.charts.Chart({
+                primaryXAxis: { title: "Animal", valueType: "Category" },
+                primaryYAxis: { title: "Total Produce", labelFormat: "{value}" },
+                series: [
+                    {
+                        type: "Column",
+                        dataSource: totalProduceData,
+                        xName: "animal",
+                        yName: "total_produce",
+                        name: "Total Produce",
+                        fill: "#3498db"
+                    }
+                ],
+                tooltip: { enable: true },
+                legendSettings: { visible: true }
+            });
+            produceChart.appendTo("#produceChart");
+        });
+    </script>
+</body>
+</html>
