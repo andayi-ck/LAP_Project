@@ -766,31 +766,181 @@ def search_vets():
 @login_required
 def create_event():
     if current_user.role != 'admin':
-        flash('Unauthorized access.', 'error')
+        flash('Unauthorized access. Only admins can create events.', 'error')
         return redirect(url_for('home_page'))
-
-    if request.method == 'POST':
-        title = request.form.get('title')
-        content = request.form.get('content')
-        event_date_str = request.form.get('event_date')
-
-        try:
-            event_date = datetime.strptime(event_date_str, '%Y-%m-%d')
-        except ValueError:
-            flash('Invalid date format. Use YYYY-MM-DD.', 'error')
-            return redirect(url_for('create_event'))
-
+    
+    form = CreateEventForm()
+    if form.validate_on_submit():
+        event_date = datetime.combine(form.event_date.data, time(0, 0))
         new_event = Event(
-            title=title,
-            content=content,
-            event_date=event_date,
-            sent=False
+            title=form.title.data,
+            content=form.content.data,
+            event_date=event_date
         )
         db.session.add(new_event)
         db.session.commit()
-
         flash('Event created successfully!', 'success')
-        return redirect(url_for('create_event'))
+        return redirect(url_for('home_page'))
+    
+    return render_template('create_event.html', form=form)
 
-    return render_template('create_event.html')
+
+
+
+@app.route('/unsubscribe/<email>')
+def unsubscribe(email):
+    user = User.query.filter_by(email_address=email).first()
+    if user and user.role == 'subscriber':
+        db.session.delete(user)
+        db.session.commit()
+        flash('You have been unsubscribed successfully.', 'success')
+    else:
+        flash('Email not found or not a subscriber.', 'error')
+    return redirect(url_for('home_page'))
+
+
+
+
+@app.route('/analytics_dashboard')
+def analytics_dashboard():
+    return render_template('analytics_dashboard.html')
+
+
+@app.route('/animal_search_results', methods=['GET'])
+def animal_search_results():
+    query = request.args.get('animal', '').strip()
+
+    if not query:
+        return render_template('analytics_dashboard.html', error="Please enter an animal name.")
+
+    animal = Animalia.query.filter(db.func.lower(Animalia.name) == query.lower()).first()
+    if not animal:
+        return render_template('analytics_dashboard.html', error=f"No data found for {query}.", animal=query)
+    animal_id = animal.id
+
+    species = Specificia.query.filter_by(animal_id=animal_id).first()
+    habitat = Habitatty.query.filter_by(animal_id=animal_id).first()
+
+    feeds = AnimalsFeed.query.filter_by(animal_id=animal_id).all()
+    vaccines = VaccinationTimetable.query.filter_by(animal_id=animal_id).all()
+    diseases = DiseasesInfection.query.filter_by(animal_id=animal_id).all()
+    feed_intakes = ExpectedFeedIntake.query.filter_by(animal_id=animal_id).all()
+    produces = ExpectedProduce.query.filter_by(animal_id=animal_id).all()
+
+    feeds_chart_data = [
+        {"age_range": f.age_range, "feed_type": f.feed_type, "quantity_per_day": f.quantity_per_day}
+        for f in feeds
+    ]
+    vaccination_chart_data = [
+        {"age_range": v.age_range, "vaccine_name": v.vaccine_name}
+        for v in vaccines
+    ]
+    diseases_infection_chart_data = [
+        {"age_range": d.age_range, "disease_name": d.disease_name}
+        for d in diseases
+    ]
+    feed_intake_chart_data = [
+        {"age_range": fi.age_range, "expected_intake": fi.expected_intake}
+        for fi in feed_intakes
+    ]
+    produce_chart_data = [
+        {"age_range": p.age_range, "product_type": p.product_type, "expected_amount": p.expected_amount}
+        for p in produces
+    ]
+
+    grouped_results = {}
+    for table_data, key in [
+        (feeds, 'feeds'), (vaccines, 'vaccines'),
+        (diseases, 'diseases_infection'),
+        (feed_intakes, 'feed_intakes'), (produces, 'produces')
+    ]:
+        for row in table_data:
+            age = row.age_range or 'Unknown'
+            if age not in grouped_results:
+                grouped_results[age] = {
+                    'species_name': species.name if species else 'Not Available',
+                    'habitat': habitat.preferred_conditions if habitat else 'Not Available',
+                    'temperature_range': habitat.temperature_range if habitat else 'Not Available',
+                    'feeds': [], 'vaccines': [],
+                    'diseases_infection': [],
+                    'feed_intakes': [], 'produces': []
+                }
+            if key == 'feeds':
+                grouped_results[age]['feeds'].append({'feed_type': row.feed_type, 'quantity_per_day': row.quantity_per_day})
+            elif key == 'vaccines':
+                grouped_results[age]['vaccines'].append(row.vaccine_name)
+            elif key == 'diseases_infection':
+                grouped_results[age]['diseases_infection'].append(row.disease_name)
+            elif key == 'feed_intakes':
+                grouped_results[age]['feed_intakes'].append(row.expected_intake)
+            elif key == 'produces':
+                grouped_results[age]['produces'].append({'product_type': row.product_type, 'expected_amount': row.expected_amount})
+
+    if not grouped_results:
+        return render_template('analytics_dashboard.html', error=f"No detailed data found for {query}.", animal=query)
+
+    return render_template(
+        'analytics_dashboard.html',
+        grouped_results=grouped_results,
+        animal=query,
+        feeds_chart_data=feeds_chart_data,
+        vaccination_chart_data=vaccination_chart_data,
+        diseases_chart_data=diseases_infection_chart_data,
+        feed_intake_chart_data=feed_intake_chart_data,
+        produce_chart_data=produce_chart_data
+    )
+    
+    
+@app.route('/dashboard')
+def dashboard():
+    # Fetch all animals
+    animals = Animalia.query.all()
+    total_feed_intake_data = []
+    total_produce_data = []
+
+    for animal in animals:
+        animal_id = animal.id
+        # Aggregate feed intake
+        feed_intakes = ExpectedFeedIntake.query.filter_by(animal_id=animal_id).all()
+        total_feed = sum(fi.expected_intake for fi in feed_intakes)
+        total_feed_intake_data.append({"animal": animal.name, "total_feed": total_feed})
+
+        # Aggregate produce
+        produces = ExpectedProduce.query.filter_by(animal_id=animal_id).all()
+        total_produce = sum(p.expected_amount for p in produces)
+        total_produce_data.append({"animal": animal.name, "total_produce": total_produce})
+
+    return render_template(
+        'dashboard.html',
+        total_feed_intake_data=total_feed_intake_data,
+        total_produce_data=total_produce_data
+    )
+    
+    
+@app.route('/api/chart_data/<animal>/<chart_type>/<age_range>', methods=['GET'])
+def get_chart_data(animal, chart_type, age_range):
+    animal = Animalia.query.filter(db.func.lower(Animalia.name) == animal.lower()).first()
+    if not animal:
+        return {"error": "Animal not found"}, 404
+    animal_id = animal.id
+
+    if chart_type == "feeds":
+        data = AnimalsFeed.query.filter_by(animal_id=animal_id, age_range=age_range).all()
+        chart_data = [{"age_range": d.age_range, "feed_type": d.feed_type, "quantity_per_day": d.quantity_per_day} for d in data]
+    elif chart_type == "vaccines":
+        data = VaccinationTimetable.query.filter_by(animal_id=animal_id, age_range=age_range).all()
+        chart_data = [{"age_range": d.age_range, "vaccine_name": d.vaccine_name} for d in data]
+    elif chart_type == "diseases":
+        data = DiseasesInfection.query.filter_by(animal_id=animal_id, age_range=age_range).all()
+        chart_data = [{"age_range": d.age_range, "disease_name": d.disease_name} for d in data]
+    elif chart_type == "feed_intake":
+        data = ExpectedFeedIntake.query.filter_by(animal_id=animal_id, age_range=age_range).all()
+        chart_data = [{"age_range": d.age_range, "expected_intake": d.expected_intake} for d in data]
+    elif chart_type == "produce":
+        data = ExpectedProduce.query.filter_by(animal_id=animal_id, age_range=age_range).all()
+        chart_data = [{"age_range": d.age_range, "product_type": d.product_type, "expected_amount": d.expected_amount} for d in data]
+    else:
+        return {"error": "Invalid chart type"}, 400
+
+    return chart_data
 
