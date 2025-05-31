@@ -92,3 +92,14 @@ class Farmer(db.Model):
     name = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(200), nullable=False)
 
+class Illness(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    symptoms = db.Column(db.String(500), nullable=False)  # Comma-separated list of symptoms
+    required_specialist = db.Column(db.String(100), nullable=False)  # Matches Veterinary.specialty
+
+    def __repr__(self):
+        return f"Illness('{self.name}', '{self.required_specialist}')"
+
+
+
