@@ -100,6 +100,14 @@ class Illness(db.Model):
 
     def __repr__(self):
         return f"Illness('{self.name}', '{self.required_specialist}')"
+    
+# Forms (assumed based on usage)
+class RegisterForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=30)])
+    email_address = StringField('Email', validators=[DataRequired(), Email(), Length(max=50)])
+    password1 = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password1')])
+    submit = SubmitField('Register')
 
 
 
