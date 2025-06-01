@@ -108,6 +108,18 @@ class RegisterForm(FlaskForm):
     password1 = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password1')])
     submit = SubmitField('Register')
+    
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=30)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+    
+class ChatForm(FlaskForm):
+    receiver_id = SelectField('Send To', coerce=int, validators=[DataRequired()])
+    content = TextAreaField('Message', validators=[DataRequired(), Length(max=500)])
+    submit = SubmitField('Send')
+    
+
 
 
 
