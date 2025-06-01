@@ -161,6 +161,26 @@ class Tip(db.Model):
 
 
 
+class GeneralInfo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String, nullable=True)  # e.g., health, feeding, medication, care
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    
+class Appointment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    vet_id = db.Column(db.Integer, nullable=False)  # Not linked to a Vet model since vet data is static in HTML
+    vet_name = db.Column(db.String(100), nullable=False)
+    appointment_date = db.Column(db.String(20), nullable=False)
+    appointment_time = db.Column(db.String(20), nullable=False)
+    animal_type = db.Column(db.String(50), nullable=False)
+    owner_name = db.Column(db.String(100), nullable=False)
+    owner_email = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
 
 
 
