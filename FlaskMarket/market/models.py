@@ -119,6 +119,28 @@ class ChatForm(FlaskForm):
     content = TextAreaField('Message', validators=[DataRequired(), Length(max=500)])
     submit = SubmitField('Send')
     
+class TipForm(FlaskForm):
+    content = TextAreaField('Tip', validators=[DataRequired(), Length(max=1000)])
+    submit = SubmitField('Post Tip')
+
+
+class CampaignForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
+    description = TextAreaField('Description', validators=[DataRequired(), Length(max=1000)])
+    location = StringField('Location', validators=[DataRequired(), Length(max=100)])
+    date = DateTimeField('Date', format='%Y-%m-%d %H:%M', validators=[DataRequired()])
+    organizer = StringField('Organizer', validators=[DataRequired(), Length(max=100)])
+    submit = SubmitField('Post Campaign')
+
+    
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', backref='notifications')
+    category = db.Column(db.String(50), nullable=True)
 
 
 
