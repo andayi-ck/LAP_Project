@@ -142,6 +142,25 @@ class Notification(db.Model):
     user = db.relationship('User', backref='notifications')
     category = db.Column(db.String(50), nullable=True)
 
+class Campaign(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    organizer = db.Column(db.String(100), nullable=False)
+    posted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+class Tip(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    posted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    author = db.relationship('User', backref='tips')
+
+
+
 
 
 
