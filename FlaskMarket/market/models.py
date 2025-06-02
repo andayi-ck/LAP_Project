@@ -181,6 +181,27 @@ class Appointment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
-
+class Vet(db.Model):
+    __tablename__ = 'vet'  # Explicitly specify the table name
+    vet_id = db.Column(db.String(50), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    specialty = db.Column(db.String(100), nullable=False)
+    clinic = db.Column(db.String(100), nullable=False)
+    experience = db.Column(db.Integer, nullable=False)
+    availability = db.Column(db.String(100), nullable=False)
+    accepting = db.Column(db.String(100), nullable=False)
+    rating = db.Column(db.String(50), nullable=False)
+    rating_score = db.Column(db.Float, nullable=False, default=0.0)  # New field for numeric rating
+    review_count = db.Column(db.Integer, nullable=False, default=0)  # New field for review count
+    price = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(200), nullable=False)
+    animal_types = db.Column(db.String(255))
+    diseases = db.Column(db.String(255))
+    reviews = db.Column(db.String(500), nullable=True)  # New field for reviews
+    
+    
+    def __repr__(self):
+        return f'<Vet {self.name}>'
 
 
