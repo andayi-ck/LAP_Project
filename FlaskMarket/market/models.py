@@ -215,7 +215,19 @@ class SymptomCheckerDisease(db.Model):
     def __repr__(self):
         return f'<SymptomCheckerDisease {self.name} for {self.animal_type}>'
 
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    date = db.Column(db.String(20), nullable=False)  # Format: YYYY-MM-DD
+    time = db.Column(db.String(10), nullable=False)  # Format: HH:MM
+    duration = db.Column(db.Integer, nullable=False)  # Duration in hours
+    image_url = db.Column(db.String(200), nullable=True)  # Optional image URL
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+
+    def __repr__(self):
+        return f'<Event {self.title}>'
 
 
 
