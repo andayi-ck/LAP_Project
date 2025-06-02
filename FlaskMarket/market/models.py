@@ -238,6 +238,19 @@ class Specificia(db.Model):
     animal_id = db.Column(db.Integer, db.ForeignKey('animalia.id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)
 
+class Habitatty(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animalia.id'), nullable=False)
+    preferred_conditions = db.Column(db.String(100))
+    temperature_range = db.Column(db.String(50))
+
+# Table for animal feeds across different ages
+class AnimalsFeed(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animalia.id'), nullable=False)
+    age_range = db.Column(db.String(50))
+    feed_type = db.Column(db.String(50))
+    quantity_per_day = db.Column(db.String(50))
 
 
 
