@@ -252,6 +252,13 @@ class AnimalsFeed(db.Model):
     feed_type = db.Column(db.String(50))
     quantity_per_day = db.Column(db.String(50))
 
+# Table for vaccination schedules across different ages
+class VaccinationTimetable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animalia.id'), nullable=False)
+    age_range = db.Column(db.String(50))
+    vaccine_name = db.Column(db.String(50))
+
 
 
 
