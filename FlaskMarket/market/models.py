@@ -268,5 +268,13 @@ class DiseasesInfection(db.Model):
     disease_name = db.Column(db.String(50))
 
 
+# Table for expected feed intake across different ages
+class ExpectedFeedIntake(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animalia.id'), nullable=False)
+    age_range = db.Column(db.String(50))
+    expected_intake = db.Column(db.Float)  # in kg per day
+
+
 
 
