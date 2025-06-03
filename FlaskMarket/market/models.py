@@ -276,5 +276,14 @@ class ExpectedFeedIntake(db.Model):
     expected_intake = db.Column(db.Float)  # in kg per day
 
 
+# Table for expected produce across different ages
+class ExpectedProduce(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animalia.id'), nullable=False)
+    age_range = db.Column(db.String(50))
+    product_type = db.Column(db.String(50))
+    expected_amount = db.Column(db.Float)  # e.g., liters of milk, kg of meat, etc.
+    
+
 
 
