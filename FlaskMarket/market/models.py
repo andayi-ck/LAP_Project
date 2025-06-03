@@ -260,5 +260,13 @@ class VaccinationTimetable(db.Model):
     vaccine_name = db.Column(db.String(50))
 
 
+# CHANGE 1: Renamed Diseases to DiseasesInfection
+class DiseasesInfection(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animalia.id'), nullable=False)
+    age_range = db.Column(db.String(50))
+    disease_name = db.Column(db.String(50))
+
+
 
 
