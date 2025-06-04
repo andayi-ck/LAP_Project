@@ -331,6 +331,19 @@ def send_event_notifications():
                     To unsubscribe, click here: {url_for('unsubscribe', email=subscriber.email_address, _external=True)}
                     """
                 )
+                try:
+                    mail.send(msg)
+                except Exception as e:
+                    app.logger.error(f"Failed to send event email to {subscriber.email_address}: {str(e)}")
+
+            event.sent = True
+            db.session.commit()
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=send_event_notifications, trigger="interval", hours=24)
+scheduler.start()
+
+
 
 
 
