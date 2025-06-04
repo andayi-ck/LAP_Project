@@ -306,6 +306,32 @@ def send_subscription_confirmation_email(email, username):
     )
     mail.send(msg)
 
+def send_event_notifications():
+    with app.app_context():
+        events = Event.query.filter_by(sent=False).all()
+        subscribers = User.query.filter_by(role='subscriber').all()
+
+        for event in events:
+            for subscriber in subscribers:
+                msg = Message(
+                    subject=f"Upcoming Event: {event.title}",
+                    recipients=[subscriber.email_address],
+                    body=f"""
+                    Hello {subscriber.username},
+
+                    We have an upcoming event for you!
+
+                    **{event.title}**
+                    Date: {event.event_date.strftime('%Y-%m-%d')}
+                    Details: {event.content}
+
+                    Best regards,
+                    The Livestock Management Team
+
+                    To unsubscribe, click here: {url_for('unsubscribe', email=subscriber.email_address, _external=True)}
+                    """
+                )
+
 
 
 
