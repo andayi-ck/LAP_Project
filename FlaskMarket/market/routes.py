@@ -289,6 +289,26 @@ def send_appointment_email(email_receiver, vet_name, appointment_date, appointme
         raise
 
 
+def send_subscription_confirmation_email(email, username):
+    msg = Message(
+        subject="Welcome to Livestock Management System!",
+        recipients=[email],
+        body=f"""
+        Hello {username},
+
+        Thank you for subscribing to the Livestock Management System! You’ll now receive notifications about upcoming livestock events, campaigns, tips, and other communications.
+
+        If you did not sign up for this, please ignore this email or contact us at support@livestockmgmt.com.
+
+        Best regards,
+        The Livestock Management Team
+        """
+    )
+    mail.send(msg)
+
+
+
+
 
 
         
