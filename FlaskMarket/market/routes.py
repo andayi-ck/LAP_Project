@@ -375,6 +375,37 @@ def register_page():
         db.session.add(new_user)
         db.session.commit()
 
+        # Create account creation notification with "account" category
+        notification = Notification(
+            user_id=new_user.id,
+            content=f"Welcome, {new_user.username}! Your account has been created successfully. Please verify your email to continue.",
+            read=False,
+            created_at=datetime.utcnow(),
+            category="account"  # Set category for styling in notifications.html
+        )
+        db.session.add(notification)
+        db.session.commit()
+
+        # Generate verification token and send email
+        token = generate_verification_token(new_user.email_address)
+        try:
+            send_verification_email(new_user.email_address, new_user.username, token)
+            flash("Account created! Please check your email to verify your account.", category='success')
+        except Exception as e:
+            flash("Failed to send verification email. Please try again later.", category='danger')
+            print(f"Email sending failed: {str(e)}")
+            # Optionally delete the user if email fails
+            db.session.delete(new_user)
+            db.session.delete(notification)
+            db.session.commit()
+            return render_template('register.html', form=form)
+
+        # Redirect to verify pending page for new users
+        return redirect(url_for('verify_pending', email=new_user.email_address))
+
+    return render_template('register.html', form=form)
+
+
         
 
 
