@@ -344,6 +344,38 @@ scheduler.add_job(func=send_event_notifications, trigger="interval", hours=24)
 scheduler.start()
 
 
+import atexit
+atexit.register(lambda: scheduler.shutdown())
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register_page():
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        # Debug: Print the submitted role to verify
+        print(f"Submitted role: {form.role.data}")
+
+        # Check for existing username or email
+        if User.query.filter_by(username=form.username.data).first():
+            flash("Username already exists.", category='danger')
+            return render_template('register.html', form=form)
+        if User.query.filter_by(email_address=form.email_address.data).first():
+            flash("Email already exists.", category='danger')
+            return render_template('register.html', form=form)
+
+        # Create new user with the selected role
+        new_user = User(
+            username=form.username.data,
+            email_address=form.email_address.data,
+            password_hash=generate_password_hash(form.password1.data),
+            role=form.role.data,
+            email_verified=False
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        
 
 
 
