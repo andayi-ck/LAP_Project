@@ -406,6 +406,12 @@ def register_page():
     return render_template('register.html', form=form)
 
 
+@app.route('/verify-pending/<email>')
+def verify_pending(email):
+    return render_template('verify_pending.html', email=email)
+
+
+
         
 
 
