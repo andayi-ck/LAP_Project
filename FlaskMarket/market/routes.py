@@ -411,6 +411,21 @@ def verify_pending(email):
     return render_template('verify_pending.html', email=email)
 
 
+@app.route('/resend-verification/<email>')
+def resend_verification(email):
+    user = User.query.filter_by(email_address=email, email_verified=False).first()
+    if user:
+        token = generate_verification_token(user.email_address)  # Assume this function exists
+        try:
+            send_verification_email(user.email_address, user.username, token)
+            flash("A new verification email has been sent!", category='info')
+        except Exception as e:
+            flash("Failed to send verification email. Please try again later.", category='danger')
+            print(f"Email sending failed: {str(e)}")
+    else:
+        flash("No unverified account found for this email.", category='danger')
+    return redirect(url_for('verify_pending', email=email))
+
 
         
 
