@@ -427,6 +427,47 @@ def resend_verification(email):
     return redirect(url_for('verify_pending', email=email))
 
 
+
+@app.route('/verify-email/<token>', methods=['GET'])
+def verify_email(token):
+    email = verify_verification_token(token)
+    if not email:
+        flash("The verification link is invalid or has expired.", category='danger')
+        return redirect(url_for('login_page'))
+
+    user = User.query.filter_by(email_address=email).first()
+    if not user:
+        flash("User not found.", category='danger')
+        return redirect(url_for('login_page'))
+
+    if user.email_verified:
+        flash("Email already verified. Please log in.", category='info')
+        return redirect(url_for('login_page'))
+
+    # Verify the email
+    user.email_verified = True
+    db.session.commit()
+
+    # Create a notification for successful verification
+    notification = Notification(
+        user_id=user.id,
+        content="Your email has been successfully verified!",
+        read=False,
+        created_at=datetime.utcnow()
+    )
+    db.session.add(notification)
+    db.session.commit()
+
+    # Log in the user after verification
+    login_user(user)
+
+    flash("Email verified successfully! Welcome aboard!", category='success')
+
+    # Redirect based on role
+    if user.role == 'admin':
+        return redirect(url_for('create_event'))
+    return redirect(url_for('home_page'))
+
         
 
 
