@@ -468,6 +468,15 @@ def verify_email(token):
         return redirect(url_for('create_event'))
     return redirect(url_for('home_page'))
 
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+
+
         
 
 
