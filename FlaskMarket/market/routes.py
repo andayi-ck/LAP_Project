@@ -477,6 +477,46 @@ def load_user(user_id):
 
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login_page():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        
+        if user:
+            if check_password_hash(user.password_hash, form.password.data):
+                if user.email_verified:
+                    login_user(user)
+                    session.permanent = True  # Make session permanent
+                    # Create login notification with "login" category
+                    notification = Notification(
+                        user_id=user.id,
+                        content=f"Welcome back, {user.username}! You have successfully logged in.",
+                        read=False,
+                        created_at=datetime.utcnow(),
+                        category="login"  # Set category for styling in notifications.html
+                    )
+                    db.session.add(notification)
+                    db.session.commit()
+                    
+                    # Redirect based on role
+                    if user.role == 'admin':
+                        return redirect(url_for('create_event'))
+                    return redirect(url_for('home_page'))
+                else:
+                    flash("Please verify your email before logging in.", category='warning')
+                    return redirect(url_for('verify_pending', email=user.email_address))
+            else:
+                flash("Incorrect password. Please try again.", category='danger')
+                return render_template('login.html', form=form)
+        else:
+            flash("Username not found. Please register to create an account.", category='danger')
+            return redirect(url_for('register_page'))
+    
+    return render_template('login.html', form=form)
+
+
+
         
 
 
