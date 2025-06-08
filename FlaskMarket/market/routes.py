@@ -516,6 +516,43 @@ def login_page():
     return render_template('login.html', form=form)
 
 
+@app.route('/chat', methods=['GET', 'POST'])
+def chat():
+    form = ChatForm()
+    user = current_user
+    
+    if user.role == 'farmer':
+        form.receiver_id.choices = [(u.id, u.username) for u in User.query.filter_by(role='vet').all()]
+    else:
+        form.receiver_id.choices = [(u.id, u.username) for u in User.query.filter_by(role='farmer').all()]
+    
+    if form.validate_on_submit():
+        message = Message(
+            sender_id=user.id,
+            receiver_id=form.receiver_id.data,
+            content=form.content.data
+        )
+        db.session.add(message)
+        notification = Notification(
+            user_id=form.receiver_id.data,
+            content=f"New message from {user.username}"
+        )
+        db.session.add(notification)
+        receiver = User.query.get(form.receiver_id.data)
+        send_vetconnect_alert(
+            receiver.email_address,
+            "New Message in VetApp",
+            f"Hi {receiver.username},\n\nYou have a new message from {user.username}: {form.content.data}\n\nCheck it at {url_for('chat', _external=True)}"
+        )
+        db.session.commit()
+        flash("Message sent!", category='success')
+        return redirect(url_for('chat'))
+    
+    sent = Message.query.filter_by(sender_id=user.id).order_by(Message.timestamp.desc()).all()
+    received = Message.query.filter_by(receiver_id=user.id).order_by(Message.timestamp.desc()).all()
+    
+    return render_template('chat.html', form=form, sent=sent, received=received)
+
 
         
 
