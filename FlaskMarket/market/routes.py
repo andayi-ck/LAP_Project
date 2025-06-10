@@ -613,7 +613,38 @@ def get_tips():
         app.logger.error(f"Error fetching tip: {str(e)}")
         return jsonify({'error': 'Failed to load tip', 'message': str(e)}), 500
 
-        
+
+
+@app.route('/api/general_info', methods=['GET'])
+@login_required
+def get_general_info():
+    try:
+        # Verify table exists and has data
+        item = GeneralInfo.query.order_by(func.random()).first()
+        if not item:
+            app.logger.info("No general info found, returning fallback")
+            return jsonify({
+                'title': 'Placeholder Health Tip',
+                'content': 'Ensure regular vet checkups for livestock health.',
+                'category': 'health',
+                'created_at': datetime.utcnow().strftime('%b %d, %Y %I:%M %p'),
+                'type': 'info'
+            })
+        # Ensure all fields are accessible
+        return jsonify({
+            'title': item.title if item.title else 'Untitled Info',
+            'content': item.content if item.content else 'No content',
+            'category': item.category if item.category else 'Unknown',
+            'created_at': item.created_at.strftime('%b %d, %Y %I:%M %p') if item.created_at else 'Unknown',
+            'type': 'info'
+        })
+    except Exception as e:
+        app.logger.error(f"Error fetching general info: {str(e)}")
+        # Ensure JSON response even on failure
+        return jsonify({
+            'error': 'Failed to load general info',
+            'message': f"Server error: {str(e)}"
+        }), 500
 
 
 
