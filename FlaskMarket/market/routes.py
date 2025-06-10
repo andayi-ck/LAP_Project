@@ -588,6 +588,31 @@ def tips():
     return render_template('tips.html', form=form, tips_list=tips_list)
 
 
+@app.route('/api/tips', methods=['GET'])
+@login_required
+def get_tips():
+    try:
+        tip = Tip.query.order_by(func.random()).first()
+        if not tip:
+            app.logger.info("No tips found, returning fallback")
+            return jsonify({
+                'title': 'Placeholder Tip',
+                'content': 'Share your own livestock tips with the community!',
+                'author': 'System',
+                'posted_at': datetime.utcnow().strftime('%b %d, %Y %I:%M %p'),
+                'type': 'tip'
+            })
+        return jsonify({
+            'title': tip.title or 'Untitled Tip',
+            'content': tip.content or 'No content',
+            'author': tip.author.username if tip.author else 'Unknown',
+            'posted_at': tip.posted_at.strftime('%b %d, %Y %I:%M %p') if tip.posted_at else 'Unknown',
+            'type': 'tip'
+        })
+    except Exception as e:
+        app.logger.error(f"Error fetching tip: {str(e)}")
+        return jsonify({'error': 'Failed to load tip', 'message': str(e)}), 500
+
         
 
 
