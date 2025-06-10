@@ -554,6 +554,40 @@ def chat():
     return render_template('chat.html', form=form, sent=sent, received=received)
 
 
+@app.route('/tips', methods=['GET', 'POST'])
+@login_required
+def tips():
+    form = TipForm()
+    if current_user.role == 'vet' and form.validate_on_submit():
+        try:
+            tip = Tip(
+                title=form.title.data,
+                content=form.content.data,
+                author_id=current_user.id
+            )
+            db.session.add(tip)
+            db.session.commit()
+            
+            # Create notification for the vet (confirmation)
+            vet_notification = Notification(
+                content=f"Tip Posted: {form.title.data}",
+                category='tip_confirmation',
+                user_id=current_user.id
+            )
+            db.session.add(vet_notification)
+            db.session.commit()
+            
+            flash("Tip posted successfully!", category='success')
+            return redirect(url_for('tips'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error posting tip: {str(e)}", category='error')
+            app.logger.error(f"Error saving tip: {str(e)}")
+    
+    tips_list = Tip.query.order_by(Tip.posted_at.desc()).all()
+    return render_template('tips.html', form=form, tips_list=tips_list)
+
+
         
 
 
