@@ -647,6 +647,19 @@ def get_general_info():
         }), 500
 
 
+@app.route('/campaigns', methods=['GET', 'POST'])
+def campaigns():
+    form = CampaignForm()
+    if current_user.role == 'vet' and form.validate_on_submit():
+        campaign = Campaign(
+            title=form.title.data,
+            description=form.description.data,
+            location=form.location.data,
+            date=form.date.data,
+            organizer=form.organizer.data
+        )
+
+
 
 
 
