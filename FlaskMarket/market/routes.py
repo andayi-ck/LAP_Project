@@ -658,6 +658,26 @@ def campaigns():
             date=form.date.data,
             organizer=form.organizer.data
         )
+        db.session.add(campaign)
+        farmers = User.query.filter_by(role='farmer').all()
+        for farmer in farmers:
+            notification = Notification(
+                user_id=farmer.id,
+                content=f"New campaign: {form.title.data} in {form.location.data}"
+            )
+            db.session.add(notification)
+            send_vetconnect_alert(
+                farmer.email_address,
+                "New Veterinary Campaign",
+                f"Hi {farmer.username},\n\nA new campaign '{form.title.data}' is scheduled in {form.location.data} on {form.date.data.strftime('%Y-%m-%d %H:%M')}.\n\nDetails: {form.description.data}\n\nView at {url_for('campaigns', _external=True)}"
+            )
+        db.session.commit()
+        flash("Campaign posted!", category='success')
+        return redirect(url_for('campaigns'))
+    
+    campaigns_list = Campaign.query.order_by(Campaign.date.asc()).all()
+    return render_template('campaigns.html', form=form, campaigns=campaigns_list)
+
 
 
 
