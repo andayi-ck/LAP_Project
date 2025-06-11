@@ -680,6 +680,22 @@ def campaigns():
 
 
 
+@app.route('/notifications')
+@login_required
+def notifications():
+    if current_user.is_authenticated:
+        notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+    else:
+        notifications = Notification.query.filter_by(user_id=None).order_by(Notification.created_at.desc()).all()
+    return render_template('notifications.html', notifications=notifications)
+
+@app.route('/notifications/count')
+@login_required
+def notifications_count():
+    unread_count = Notification.query.filter_by(user_id=current_user.id, read=False).count()
+    return jsonify({'unread_count': unread_count})
+
+
 
 
 
