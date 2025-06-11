@@ -696,6 +696,18 @@ def notifications_count():
     return jsonify({'unread_count': unread_count})
 
 
+@app.route('/mark_read/<int:id>', methods=['POST'])
+@login_required
+def mark_read(id):
+    notification = Notification.query.get_or_404(id)
+    if notification.user_id != current_user.id:
+        flash("Unauthorized action.", category='danger')
+        return redirect(url_for('notifications'))
+    notification.read = True
+    db.session.commit()
+    flash("Notification marked as read.", category='success')
+    return redirect(url_for('notifications'))
+
 
 
 
