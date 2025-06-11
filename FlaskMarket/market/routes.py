@@ -716,6 +716,16 @@ def clear_notifications():
     return redirect(url_for('notifications'))
 
 
+@app.route('/logout')
+@login_required
+def logout_page():
+    user_id = current_user.id
+    logout_user()
+    notification = Notification(user_id=user_id, content="You have been logged out.", read=False, category="platform")
+    db.session.add(notification)
+    db.session.commit()
+    return redirect(url_for('notifications'))
+
 
 
         
