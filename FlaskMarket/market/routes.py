@@ -727,5 +727,94 @@ def logout_page():
     return redirect(url_for('notifications'))
 
 
+#added this code for the search bar at the navbar in 'base.html'
+@app.route('/search', methods=['GET'])
+def search_results():
+    query = request.args.get('animal', '').strip()
+
+    if not query:
+        return render_template('livestock_dashboard.html', error="Please enter an animal name.")
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get animal ID
+    cur.execute("SELECT id FROM Animals WHERE LOWER(name) = LOWER(?)", (query,))
+    animal = cur.fetchone()
+    if not animal:
+        conn.close()
+        return render_template('livestock_dashboard.html', error=f"No data found for {query}.", animal=query)
+    animal_id = animal['id']
+
+    # Fetch static data (no age range)
+    cur.execute("SELECT name AS species_name FROM Species WHERE animal_id = ?", (animal_id,))
+    species = cur.fetchone()
+
+    cur.execute("SELECT preferred_conditions AS habitat, temperature_range FROM Habitat WHERE animal_id = ?", (animal_id,))
+    habitat = cur.fetchone()
+
+    cur.execute("SELECT product_type AS produce FROM Produce WHERE animal_id = ?", (animal_id,))
+    produce = cur.fetchone()
+
+    # Fetch age-specific data
+    cur.execute("SELECT age_range, feed_type, quantity_per_day FROM Feed WHERE animal_id = ?", (animal_id,))
+    feeds = cur.fetchall()
+
+    cur.execute("SELECT age_range, vaccine_name FROM VaccinationSchedule WHERE animal_id = ?", (animal_id,))
+    vaccines = cur.fetchall()
+
+    cur.execute("SELECT age_range, disease_name FROM Diseases WHERE animal_id = ?", (animal_id,))
+    diseases = cur.fetchall()
+
+    cur.execute("SELECT age_range, average_weight FROM WeightTracking WHERE animal_id = ?", (animal_id,))
+    weights = cur.fetchall()
+
+    cur.execute("SELECT age_range, supplement_name, dosage FROM AdditivesAndMinerals WHERE animal_id = ?", (animal_id,))
+    supplements = cur.fetchall()
+
+    conn.close()
+
+    # Group age-specific data
+    grouped_results = {}
+    for table_data, key in [
+        (feeds, 'feeds'), (vaccines, 'vaccines'), (diseases, 'diseases'),
+        (weights, 'weights'), (supplements, 'supplements')
+    ]:
+        for row in table_data:
+            age = row['age_range'] or 'Unknown'
+            if age not in grouped_results:
+                grouped_results[age] = {
+                    'species_name': species['species_name'] if species else 'Not Available',
+                    'habitat': habitat['habitat'] if habitat else 'Not Available',
+                    'temperature_range': habitat['temperature_range'] if habitat else 'Not Available',
+                    'produce': produce['produce'] if produce else 'Not Available',
+                    'feeds': [], 'vaccines': [], 'diseases': [], 'weights': [], 'supplements': []
+                }
+            if key == 'feeds':
+                grouped_results[age]['feeds'].append({'feed_type': row['feed_type'], 'quantity_per_day': row['quantity_per_day']})
+            elif key == 'vaccines':
+                grouped_results[age]['vaccines'].append(row['vaccine_name'])
+            elif key == 'diseases':
+                grouped_results[age]['diseases'].append(row['disease_name'])
+            elif key == 'weights':
+                grouped_results[age]['weights'].append(row['average_weight'])
+            elif key == 'supplements':
+                grouped_results[age]['supplements'].append({'supplement_name': row['supplement_name'], 'dosage': row['dosage']})
+
+    if not grouped_results:
+        return render_template('livestock_dashboard.html', error=f"No detailed data found for {query}.", animal=query)
+
+    return render_template('livestock_dashboard.html', grouped_results=grouped_results, animal=query)
+# Function to connect to SQLite
+def get_db_connection():
+    conn = sqlite3.connect('C:/Users/ADMIN/.vscode/.vscode/FlaskMarket/market.db')
+    conn.row_factory = sqlite3.Row  # Allows fetching results as dictionaries
+    return conn
+
+
+
+
+
+    
 
         
