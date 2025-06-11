@@ -708,6 +708,12 @@ def mark_read(id):
     flash("Notification marked as read.", category='success')
     return redirect(url_for('notifications'))
 
+@app.route('/clear_notifications', methods=['POST'])
+@login_required
+def clear_notifications():
+    deleted = Notification.query.filter_by(user_id=current_user.id, read=True).delete()
+    db.session.commit()
+    return redirect(url_for('notifications'))
 
 
 
