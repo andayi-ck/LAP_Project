@@ -812,6 +812,48 @@ def get_db_connection():
     return conn
 
 
+# Age Calculator Route
+@app.route('/livestock_dashboard/age_calculator', methods=['POST'])
+def age_calculator():
+    try:
+        # Get form data
+        dob_str = request.form['dob']
+        calc_date_str = request.form['calc_date']
+        format_choice = request.form['format_choice']
+
+        # Convert strings to datetime objects
+        dob = datetime.strptime(dob_str, '%Y-%m-%d')
+        calc_date = datetime.strptime(calc_date_str, '%Y-%m-%d')
+
+        # Validate dates
+        if calc_date < dob:
+            return jsonify({"error": "Calculate date must be after date of birth."})
+
+        # Use relativedelta for precise age calculation
+        delta = relativedelta(calc_date, dob)
+
+        # Format result based on choice
+        if format_choice == 'days':
+            total_days = (calc_date - dob).days
+            result = f"{total_days} days"
+        elif format_choice == 'weeks':
+            total_days = (calc_date - dob).days
+            weeks = total_days // 7
+            result = f"{weeks} weeks"
+        elif format_choice == 'months':
+            months = delta.years * 12 + delta.months
+            result = f"{months} months"
+        elif format_choice == 'years':
+            years = delta.years
+            result = f"{years} years"
+        elif format_choice == 'ymd':
+            result = f"{delta.years} years, {delta.months} months, {delta.days} days"
+
+        return jsonify({"result": result})
+
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Please use YYYY-MM-DD."})
+
 
 
 
