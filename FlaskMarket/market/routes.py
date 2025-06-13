@@ -864,6 +864,11 @@ def get_animal_info(animal_name):
     return animal
 
 
+@app.route('/Privacy_page')
+def Privacy_page():
+    return render_template('Privacy_page.html')
+
+
 
     
 
