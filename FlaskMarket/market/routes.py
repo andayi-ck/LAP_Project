@@ -855,6 +855,14 @@ def age_calculator():
         return jsonify({"error": "Invalid date format. Please use YYYY-MM-DD."})
 
 
+def get_animal_info(animal_name):
+    conn = sqlite3.connect('C:/Users/ADMIN/.vscode/.vscode/FlaskMarket/market.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM animals WHERE LOWER(name) = LOWER(?)", (animal_name,))
+    animal = cursor.fetchone()
+    conn.close()
+    return animal
+
 
 
     
