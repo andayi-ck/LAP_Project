@@ -869,6 +869,10 @@ def Privacy_page():
     return render_template('Privacy_page.html')
 
 
+@app.route('/nearby_vets')
+def nearby_vets():
+    return render_template('nearby-vets.html')
+
 
     
 
