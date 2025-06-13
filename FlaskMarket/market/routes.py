@@ -873,6 +873,14 @@ def Privacy_page():
 def nearby_vets():
     return render_template('nearby-vets.html')
 
+@app.route('/nearby-vets-2')
+def nearby_vets_2():
+    return render_template('nearby-vets-2.html')
+
+@app.route('/nearby-vets-3')
+def nearby_vets_3():
+    return render_template('nearby-vets-3.html')
+
 
     
 
