@@ -919,6 +919,12 @@ def livestock_dashboard():
     return render_template('livestock_dashboard.html')
 
 
+@app.route('/connect-farmers')
+def connect_farmers():
+    farmers = Farmer.query.all()
+    return render_template('connect-farmers.html', farmers=farmers)
+
+
 
 
     
