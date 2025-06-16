@@ -899,6 +899,26 @@ def schedule_appointment():
     owner_name = request.form.get('ownerName')
     owner_email = request.form.get('ownerEmail')
 
+    vet = Veterinary.query.get(vet_id)
+    if vet:
+        flash(f"Appointment booked with {vet.name} on {appointment_date} at {appointment_time} for your {animal_type}!", category='success')
+    else:
+        flash("Error booking appointment. Vet not found.", category='danger')
+    
+    return redirect(url_for('nearby_vets'))
+
+
+
+@app.route('/home2_page')
+def home2_page():
+    return render_template('home2.html')
+
+
+@app.route('/livestock_dashboard')
+def livestock_dashboard():
+    return render_template('livestock_dashboard.html')
+
+
 
 
     
