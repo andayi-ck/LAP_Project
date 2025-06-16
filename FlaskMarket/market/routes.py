@@ -882,6 +882,25 @@ def nearby_vets_3():
     return render_template('nearby-vets-3.html')
 
 
+@app.route('/nearby_vets_4')
+@login_required
+def nearby_vets_4():
+    page = request.args.get('page', 1, type=int)  # Pagination support
+    vets = Vet.query.paginate(page=page, per_page=10)  # Adjust per_page as needed
+    return render_template('nearby-vets-4.html', vets=vets)
+
+
+@app.route('/schedule_appointment', methods=['POST'])
+def schedule_appointment():
+    vet_id = request.form.get('vet_id')
+    appointment_date = request.form.get('appointmentDate')
+    appointment_time = request.form.get('appointmentTime')
+    animal_type = request.form.get('animalType')
+    owner_name = request.form.get('ownerName')
+    owner_email = request.form.get('ownerEmail')
+
+
+
     
 
         
